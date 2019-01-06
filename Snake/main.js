@@ -15,6 +15,7 @@ $('#start').click(function()
     var n=1;
 	
     var snake_array; 
+    var collision = [];
     
     $('#poczatek').css('display','none');
     $('.wyniki').css('visibility','visible');
@@ -28,7 +29,8 @@ $('#start').click(function()
 		if(typeof game_loop != "undefined") clearInterval(game_loop);
 		game_loop = setInterval(paint, czas);
 	}
-	init();
+    init();
+    przeszkody();
 	
 	function create_snake()
 	{
@@ -50,14 +52,26 @@ $('#start').click(function()
 			x: Math.round(Math.random()*(w-cw)/cw), 
 			y: Math.round(Math.random()*(h-cw)/cw), 
         };
-        notSnake(); //sprawdzenie czy jedzenie nie pojawilo sie w miejscu, gdzie znajduje sie waz
+        notSnake(food1);
+        notSnake(food2); //sprawdzenie czy jedzenie nie pojawilo sie w miejscu, gdzie znajduje sie waz
+    }
+
+    function przeszkody()
+    {
+        for(var i = 0; i <15; i++)
+        {
+            collision[i] = {
+			    x: Math.round(Math.random()*(w-cw)/cw), 
+			    y: Math.round(Math.random()*(h-cw)/cw), 
+            };
+        }
     }
     
-    function notSnake()
+    function notSnake(zmienna1)
     {
         for(var i = 0; i<snake_array.length; i++)
         {
-            if(snake_array[i].x == food1.x && snake_array[i].y == food1.y || snake_array[i].x == food2.x && snake_array[i].y == food2.y)
+            if(snake_array[i].x == zmienna1.x && snake_array[i].y == zmienna1.y)
             {
                 create_food();
                 break;
@@ -81,7 +95,7 @@ $('#start').click(function()
 		else if(direction == "up") ny--;
 		else if(direction == "down") ny++;
 		
-		if(nx == -1 || nx == w/cw || ny == -1 || ny == h/cw || check_collision(nx, ny, snake_array))
+		if(nx == -1 || nx == w/cw || ny == -1 || ny == h/cw || check_collision(nx, ny, snake_array) || check_collision(nx, ny, collision))
 		{
             //koniec gry
             var imie = window.prompt("Koniec gry! Otrzymales " + wynik + " pkt. Wpisz swoje imie: ","");
@@ -92,6 +106,7 @@ $('#start').click(function()
             //restart gry
             wynik = 0;
             czas = 100;
+            przeszkody();
 			init();
 			return;
 		}
@@ -130,6 +145,10 @@ $('#start').click(function()
 		ctx.fillText(wynik_txt, 5, h-5);
         paint_cell(food1.x, food1.y,"green");
         paint_cell(food2.x, food2.y,"yellow");
+        for(var i = 0; i < 15; i++)
+        {
+            paint_cell(collision[i].x, collision[i].y,"black");
+        }
 	}
 	
 	function paint_cell(x, y, color)
@@ -149,9 +168,10 @@ $('#start').click(function()
 		}
 		return false;
     }
-    
+
     function faster()
     {
+        //przyspieszenie weza
         if(czas>75) {
             clearInterval(game_loop);
             czas=czas-2;
@@ -195,6 +215,7 @@ $('#start').click(function()
         {
             wynik = 0;
             czas = 100;
+            przeszkody();
             init();
         }
 	})
